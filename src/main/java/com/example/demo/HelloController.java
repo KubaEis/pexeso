@@ -2,6 +2,7 @@ package com.example.demo;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.GridPane;
 
 import java.util.ArrayList;
@@ -52,10 +53,10 @@ public class HelloController {
     private void handleCardClick (Card card) {
         if (firstCard == null) {
             firstCard = card;
-            firstCard.getButton().setText(String.valueOf(card.getId()));
-        } else {
+            firstCard.flip();
+        } else if (card.getButton().getText().equals("?")) {
             secondCard = card;
-            secondCard.getButton().setText(String.valueOf(card.getId()));
+            secondCard.flip();
             checkMatch();
         }
     }
@@ -70,8 +71,10 @@ public class HelloController {
             score++;
             scoreLabel.setText("SCORE: " + score);
         }else{
-            firstCard.getButton().setText("?");
-            secondCard.getButton().setText("?");
+            firstCard.flipBack();
+            secondCard.flipBack();
+            firstCard = null;
+            secondCard = null;
         }
     }
 
