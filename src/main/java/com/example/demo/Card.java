@@ -11,6 +11,7 @@ public class Card {
         this.button = new Button("?");
         this.button.setMinSize(90, 90);
     }
+
     public void flip() {
         button.setText(String.valueOf(id));
     }

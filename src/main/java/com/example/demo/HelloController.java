@@ -138,6 +138,7 @@ public class HelloController {
             }
         }
     }
+
     @FXML
     private void checkWinner() {
         if (firstPlayer.getScore() > secondPlayer.getScore()){
@@ -146,6 +147,7 @@ public class HelloController {
             InfoLabel.setText("PLAYER TWO WON (Score: "+secondPlayer.getScore()+")");
         }
     }
+    
     @FXML
     private void checkGameState() {
         if (firstPlayer.getScore()+secondPlayer.getScore() == 8){
