@@ -1,15 +1,18 @@
 package com.example.demo;
 
+import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.GridPane;
+import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
 public class HelloController {
+    PauseTransition pause =  new PauseTransition(Duration.seconds(2));
     private Card firstCard;
     private Card secondCard;
     private ArrayList<Card> cards =  new ArrayList<>();
@@ -86,6 +89,7 @@ public class HelloController {
 
     @FXML
     private void checkMatch() {
+        pause.play();
         if (firstCard.getId() == secondCard.getId()){
             if (firstPlayer.isTurn()) {
                 InfoLabel.setText("PLAYER ONE GOT A POINT");
@@ -147,7 +151,7 @@ public class HelloController {
             InfoLabel.setText("PLAYER TWO WON (Score: "+secondPlayer.getScore()+")");
         }
     }
-    
+
     @FXML
     private void checkGameState() {
         if (firstPlayer.getScore()+secondPlayer.getScore() == 8){
