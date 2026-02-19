@@ -12,7 +12,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class HelloController {
-    PauseTransition pause =  new PauseTransition(Duration.seconds(2));
+    private boolean lockBoard = false;
     private Card firstCard;
     private Card secondCard;
     private ArrayList<Card> cards =  new ArrayList<>();
@@ -75,73 +75,99 @@ public class HelloController {
             }
         }
     }
+
     @FXML
-    private void handleCardClick (Card card) {
+    private void switchPlayer() {
+        if(firstPlayer.isTurn()) {
+            firstPlayer.setTurn(false);
+            secondPlayer.setTurn(true);
+            PlayerTurn.setText("TURN: PLAYER TWO");
+        }else{
+            firstPlayer.setTurn(true);
+            secondPlayer.setTurn(false);
+            PlayerTurn.setText("TURN: PLAYER ONE");
+        }
+    }
+
+    @FXML
+    private void addScore(Player player) {
+        player.setScore(player.getScore() + 1);
+        InfoLabel.setText("PLAYER "+player.getName()+" GOT A POINT");
+        if(firstPlayer.isTurn()) {
+            PlayerOneScoreLabel.setText("PLAYER ONE SCORE: " + firstPlayer.getScore());
+        }else{
+            PlayerTwoScoreLabel.setText("PLAYER TWO SCORE: " + secondPlayer.getScore());
+        }
+    }
+
+    @FXML
+    private void handleCardClick(Card card) {
+
+        // 🔒 Pokud je deska zamčená, ignoruj klik
+        if (lockBoard) return;
+
+        // Klik na stejnou kartu
+        if (card == firstCard) return;
+
         if (firstCard == null) {
             firstCard = card;
             firstCard.flip();
-        } else if (card.getButton().getText().equals("?")) {
+        }
+        else if (secondCard == null) {
             secondCard = card;
             secondCard.flip();
             checkMatch();
         }
     }
 
+
     @FXML
     private void checkMatch() {
-        pause.play();
-        if (firstCard.getId() == secondCard.getId()){
+
+        lockBoard = true; // 🔒 zamkneme desku
+
+        if (firstCard.getId() == secondCard.getId()) {
+
             if (firstPlayer.isTurn()) {
-                InfoLabel.setText("PLAYER ONE GOT A POINT");
-                firstCard.getButton().setDisable(true);
-                secondCard.getButton().setDisable(true);
-                firstCard = null;
-                secondCard = null;
-                firstPlayer.setScore(firstPlayer.getScore() + 1);
-                PlayerOneScoreLabel.setText("PLAYER ONE SCORE: " + firstPlayer.getScore());
-                firstPlayer.setTurn(false);
-                secondPlayer.setTurn(true);
-                PlayerTurn.setText("TURN: PLAYER TWO");
-                System.out.print(firstPlayer.getScore()+secondPlayer.getScore());
-                checkGameState();
-            }else{
-                InfoLabel.setText("PLAYER TWO GOT A POINT");
-                firstCard.getButton().setDisable(true);
-                secondCard.getButton().setDisable(true);
-                firstCard = null;
-                secondCard = null;
-                secondPlayer.setScore(secondPlayer.getScore() + 1);
-                PlayerTwoScoreLabel.setText("PLAYER TWO SCORE: " + secondPlayer.getScore());
-                secondPlayer.setTurn(false);
-                firstPlayer.setTurn(true);
-                PlayerTurn.setText("TURN: PLAYER ONE");
-                System.out.print(firstPlayer.getScore()+secondPlayer.getScore());
-                checkGameState();
+                addScore(firstPlayer);
+            } else {
+                addScore(secondPlayer);
             }
-        }else{
-            if(firstPlayer.isTurn()){
-                InfoLabel.setText("WRONG CARD");
-                firstCard.flipBack();
-                secondCard.flipBack();
+
+            firstCard.getButton().setDisable(true);
+            secondCard.getButton().setDisable(true);
+
+            firstCard = null;
+            secondCard = null;
+
+            lockBoard = false; // 🔓 odemkneme
+            switchPlayer();
+            checkGameState();
+
+        } else {
+
+            InfoLabel.setText("WRONG CARD");
+
+            Card tempFirst = firstCard;
+            Card tempSecond = secondCard;
+
+            PauseTransition pause = new PauseTransition(Duration.seconds(1));
+            pause.setOnFinished(e -> {
+                tempFirst.flipBack();
+                tempSecond.flipBack();
+
                 firstCard = null;
                 secondCard = null;
-                firstPlayer.setTurn(false);
-                secondPlayer.setTurn(true);
-                PlayerTurn.setText("TURN: PLAYER TWO");
-                System.out.print(firstPlayer.getScore()+secondPlayer.getScore());
-            }else{
-                InfoLabel.setText("WRONG CARD");
-                firstCard.flipBack();
-                secondCard.flipBack();
-                firstCard = null;
-                secondCard = null;
-                secondPlayer.setTurn(false);
-                firstPlayer.setTurn(true);
-                PlayerTurn.setText("TURN: PLAYER ONE");
-                System.out.print(firstPlayer.getScore()+secondPlayer.getScore());
-            }
+
+                lockBoard = false; // 🔓 odemkneme až po otočení zpět
+                switchPlayer();
+            });
+
+            pause.play();
         }
     }
+
+
 
     @FXML
     private void checkWinner() {
@@ -157,7 +183,6 @@ public class HelloController {
         if (firstPlayer.getScore()+secondPlayer.getScore() == 8){
             checkWinner();
             NewGameButton.setDisable(false);
-
         }
     }
 
