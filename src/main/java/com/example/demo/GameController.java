@@ -4,14 +4,13 @@ import javafx.animation.PauseTransition;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.layout.GridPane;
 import javafx.util.Duration;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class HelloController {
+public class GameController {
     private boolean lockBoard = false;
     private Card firstCard;
     private Card secondCard;
@@ -34,6 +33,19 @@ public class HelloController {
     }
     @FXML
     private void newGame(){
+        int column = 0;
+        int row = 0;
+        for(int i = 0; i < cards.size(); i++){
+            grid.getChildren().remove(cards.get(i).getButton());
+            column++;
+            if (column == 4){
+                column = 0;
+                row++;
+            }
+        }
+        cards.clear();
+        generateCards();
+        displayCards();
         for(Card card : cards){
             card.flipBack();
             card.getButton().setDisable(false);
@@ -41,12 +53,12 @@ public class HelloController {
         firstPlayer.setScore(0);
         secondPlayer.setScore(0);
         InfoLabel.setText("");
-        PlayerOneScoreLabel.setText("PLAYER ONE SCORE: " + firstPlayer.getScore());
-        PlayerTwoScoreLabel.setText("PLAYER TWO SCORE: " + secondPlayer.getScore());
+        PlayerOneScoreLabel.setText("PLAYER "+firstPlayer.getName()+" COLLECTED: " + firstPlayer.getScore() + " FRUITS");
+        PlayerTwoScoreLabel.setText("PLAYER "+secondPlayer.getName()+" COLLECTED: " + secondPlayer.getScore() + " FRUITS");
         if (firstPlayer.isTurn()) {
-            PlayerTurn.setText("TURN: PLAYER ONE");
+            PlayerTurn.setText("PLAYER "+firstPlayer.getName()+" IS COLLECTING FRUITS");
         }else{
-            PlayerTurn.setText("TURN: PLAYER TWO");
+            PlayerTurn.setText("PLAYER "+secondPlayer.getName()+" IS COLLECTING FRUITS");
         }
         NewGameButton.setDisable(true);
     }
@@ -81,22 +93,22 @@ public class HelloController {
         if(firstPlayer.isTurn()) {
             firstPlayer.setTurn(false);
             secondPlayer.setTurn(true);
-            PlayerTurn.setText("TURN: PLAYER TWO");
+            PlayerTurn.setText("PLAYER "+secondPlayer.getName()+" IS COLLECTING FRUITS");
         }else{
             firstPlayer.setTurn(true);
             secondPlayer.setTurn(false);
-            PlayerTurn.setText("TURN: PLAYER ONE");
+            PlayerTurn.setText("PLAYER "+firstPlayer.getName()+" IS COLLECTING FRUITS");
         }
     }
 
     @FXML
     private void addScore(Player player) {
         player.setScore(player.getScore() + 1);
-        InfoLabel.setText("PLAYER "+player.getName()+" GOT A POINT");
+        InfoLabel.setText("PLAYER "+player.getName()+" COLLECTED A FRUIT");
         if(firstPlayer.isTurn()) {
-            PlayerOneScoreLabel.setText("PLAYER ONE SCORE: " + firstPlayer.getScore());
+            PlayerOneScoreLabel.setText("PLAYER "+firstPlayer.getName()+" COLLECTED: " + firstPlayer.getScore() + " FRUITS");
         }else{
-            PlayerTwoScoreLabel.setText("PLAYER TWO SCORE: " + secondPlayer.getScore());
+            PlayerTwoScoreLabel.setText("PLAYER "+secondPlayer.getName()+" COLLECTED: " + secondPlayer.getScore() + " FRUITS");
         }
     }
 
@@ -146,12 +158,12 @@ public class HelloController {
 
         } else {
 
-            InfoLabel.setText("WRONG CARD");
+            InfoLabel.setText("WRONG FRUIT");
 
             Card tempFirst = firstCard;
             Card tempSecond = secondCard;
 
-            PauseTransition pause = new PauseTransition(Duration.seconds(1));
+            PauseTransition pause = new PauseTransition(Duration.seconds(0.8));
             pause.setOnFinished(e -> {
                 tempFirst.flipBack();
                 tempSecond.flipBack();
@@ -172,9 +184,9 @@ public class HelloController {
     @FXML
     private void checkWinner() {
         if (firstPlayer.getScore() > secondPlayer.getScore()){
-            InfoLabel.setText("PLAYER ONE WON (Score: "+firstPlayer.getScore()+")");
+            InfoLabel.setText("PLAYER "+firstPlayer.getName()+" WON (Fruits: "+firstPlayer.getScore()+")");
         }else if (secondPlayer.getScore() > firstPlayer.getScore()){
-            InfoLabel.setText("PLAYER TWO WON (Score: "+secondPlayer.getScore()+")");
+            InfoLabel.setText("PLAYER "+secondPlayer.getName()+" WON (Fruits: "+secondPlayer.getScore()+")");
         }
     }
 
