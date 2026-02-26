@@ -226,7 +226,7 @@ public class GameController {
 
     @FXML
     private void checkGameState() {
-        if (firstPlayer.getScore()+secondPlayer.getScore() == 24){
+        if (firstPlayer.getScore()+secondPlayer.getScore() == 12){
             checkWinner();
         }
     }
