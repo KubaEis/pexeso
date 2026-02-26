@@ -12,7 +12,8 @@ public class Card {
     private Image frontImage;
     private Image backImage;
     private boolean matches;
-    public Card(int id) {
+    private boolean bonus;
+    public Card(int id, boolean bonus) {
         this.id = id;
         this.button = new Button("");
         this.button.setMinSize(90, 90);
@@ -64,5 +65,13 @@ public class Card {
 
     public void setMatches(boolean matches) {
         this.matches = matches;
+    }
+
+    public boolean isBonus() {
+        if (bonus){
+            return true;
+        }else{
+            return false;
+        }
     }
 }

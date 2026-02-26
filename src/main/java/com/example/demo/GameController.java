@@ -17,8 +17,9 @@ public class GameController {
     private ArrayList<Card> cards =  new ArrayList<>();
     Player firstPlayer = new Player("First", true);
     Player secondPlayer = new Player("Second", false);
+    Player thirdPlayer = new Player("Third", false);
     @FXML
-    private Label PlayerOneScoreLabel, PlayerTwoScoreLabel, PlayerTurn, InfoLabel;
+    private Label PlayerOneScoreLabel, PlayerTwoScoreLabel, PlayerThreeScoreLabel, PlayerTurn, InfoLabel;
     @FXML
     private GridPane grid;
     @FXML
@@ -52,23 +53,29 @@ public class GameController {
         }
         firstPlayer.setScore(0);
         secondPlayer.setScore(0);
+        thirdPlayer.setScore(0);
         InfoLabel.setText("");
-        PlayerOneScoreLabel.setText("PLAYER "+firstPlayer.getName()+" COLLECTED: " + firstPlayer.getScore() + " FRUITS");
-        PlayerTwoScoreLabel.setText("PLAYER "+secondPlayer.getName()+" COLLECTED: " + secondPlayer.getScore() + " FRUITS");
-        if (firstPlayer.isTurn()) {
-            PlayerTurn.setText("PLAYER "+firstPlayer.getName()+" IS COLLECTING FRUITS");
-        }else{
+
+        PlayerOneScoreLabel.setText("PLAYER "+firstPlayer.getName()+" COLLECTED: " + firstPlayer.getScore() + " FRUITS (pocet kol: "+firstPlayer.getTurns() + ")");
+        PlayerTwoScoreLabel.setText("PLAYER "+secondPlayer.getName()+" COLLECTED: " + secondPlayer.getScore() + " FRUITS (pocet kol: "+secondPlayer.getTurns() + ")");
+        PlayerThreeScoreLabel.setText("PLAYER "+thirdPlayer.getName()+" COLLECTED: " + thirdPlayer.getScore() + " FRUITS (pocet kol: "+thirdPlayer.getTurns() + ")");
+
+        if(firstPlayer.isTurn()) {
             PlayerTurn.setText("PLAYER "+secondPlayer.getName()+" IS COLLECTING FRUITS");
+        }else if(secondPlayer.isTurn()) {
+            PlayerTurn.setText("PLAYER "+thirdPlayer.getName()+" IS COLLECTING FRUITS");
+        }else if(thirdPlayer.isTurn()){
+            PlayerTurn.setText("PLAYER "+firstPlayer.getName()+" IS COLLECTING FRUITS");
         }
-        NewGameButton.setDisable(true);
     }
 
     @FXML
     private void generateCards(){
-        for(int i = 0; i < 8; i++){
-            cards.add(new Card(i+1));
-            cards.add(new Card(i+1));
+        for(int i = 0; i < 12; i++){
+            cards.add(new Card(i+1, false));
+            cards.add(new Card(i+1, false));
         }
+        cards.add(new Card(13, true));
     }
 
     @FXML
@@ -81,7 +88,7 @@ public class GameController {
             int finalI = i;
             cards.get(i).getButton().setOnAction(e -> handleCardClick (cards.get(finalI))) ;;
             column++;
-            if (column == 4){
+            if (column == 5){
                 column = 0;
                 row++;
             }
@@ -92,11 +99,21 @@ public class GameController {
     private void switchPlayer() {
         if(firstPlayer.isTurn()) {
             firstPlayer.setTurn(false);
+            PlayerOneScoreLabel.setDisable(true);
             secondPlayer.setTurn(true);
+            PlayerTwoScoreLabel.setDisable(false);
             PlayerTurn.setText("PLAYER "+secondPlayer.getName()+" IS COLLECTING FRUITS");
-        }else{
-            firstPlayer.setTurn(true);
+        }else if(secondPlayer.isTurn()) {
             secondPlayer.setTurn(false);
+            PlayerTwoScoreLabel.setDisable(true);
+            thirdPlayer.setTurn(true);
+            PlayerThreeScoreLabel.setDisable(false);
+            PlayerTurn.setText("PLAYER "+thirdPlayer.getName()+" IS COLLECTING FRUITS");
+        }else if(thirdPlayer.isTurn()){
+            thirdPlayer.setTurn(false);
+            PlayerThreeScoreLabel.setDisable(true);
+            firstPlayer.setTurn(true);
+            PlayerOneScoreLabel.setDisable(false);
             PlayerTurn.setText("PLAYER "+firstPlayer.getName()+" IS COLLECTING FRUITS");
         }
     }
@@ -106,86 +123,103 @@ public class GameController {
         player.setScore(player.getScore() + 1);
         InfoLabel.setText("PLAYER "+player.getName()+" COLLECTED A FRUIT");
         if(firstPlayer.isTurn()) {
-            PlayerOneScoreLabel.setText("PLAYER "+firstPlayer.getName()+" COLLECTED: " + firstPlayer.getScore() + " FRUITS");
-        }else{
-            PlayerTwoScoreLabel.setText("PLAYER "+secondPlayer.getName()+" COLLECTED: " + secondPlayer.getScore() + " FRUITS");
+            PlayerOneScoreLabel.setText("PLAYER "+firstPlayer.getName()+" COLLECTED: " + firstPlayer.getScore() + " FRUITS (pocet kol: "+firstPlayer.getTurns() + ")");
+        }else if(secondPlayer.isTurn()) {
+            PlayerTwoScoreLabel.setText("PLAYER "+secondPlayer.getName()+" COLLECTED: " + secondPlayer.getScore() + " FRUITS (pocet kol: "+secondPlayer.getTurns() + ")");
+        }else if(thirdPlayer.isTurn()) {
+            PlayerThreeScoreLabel.setText("PLAYER "+thirdPlayer.getName()+" COLLECTED: " + thirdPlayer.getScore() + " FRUITS (pocet kol: "+thirdPlayer.getTurns() + ")");
+        }
+    }
+
+    private void addTurn(Player player) {
+        player.setTurns(player.getTurns() + 1);
+        if(firstPlayer.isTurn()) {
+            PlayerOneScoreLabel.setText("PLAYER "+firstPlayer.getName()+" COLLECTED: " + firstPlayer.getScore() + " FRUITS (pocet kol: "+firstPlayer.getTurns() + ")");
+        }else if(secondPlayer.isTurn()) {
+            PlayerTwoScoreLabel.setText("PLAYER "+secondPlayer.getName()+" COLLECTED: " + secondPlayer.getScore() + " FRUITS (pocet kol: "+secondPlayer.getTurns() + ")");
+        }else if(thirdPlayer.isTurn()) {
+            PlayerThreeScoreLabel.setText("PLAYER "+thirdPlayer.getName()+" COLLECTED: " + thirdPlayer.getScore() + " FRUITS (pocet kol: "+thirdPlayer.getTurns() + ")");
         }
     }
 
     @FXML
     private void handleCardClick(Card card) {
 
-        // 🔒 Pokud je deska zamčená, ignoruj klik
         if (lockBoard) return;
 
-        // Klik na stejnou kartu
         if (card == firstCard) return;
-
-        if (firstCard == null) {
-            firstCard = card;
-            firstCard.flip();
-        }
-        else if (secondCard == null) {
-            secondCard = card;
-            secondCard.flip();
-            checkMatch();
-        }
+            if (firstCard == null) {
+                firstCard = card;
+                firstCard.flip();
+            }else if (secondCard == null) {
+                secondCard = card;
+                secondCard.flip();
+                checkMatch();
+            }
     }
 
 
     @FXML
     private void checkMatch() {
+        if(firstPlayer.isTurn()) {
+            addTurn(firstPlayer);
+        }else if(secondPlayer.isTurn()) {
+            addTurn(secondPlayer);
+        }else if(thirdPlayer.isTurn()) {
+            addTurn(thirdPlayer);
+        }
+        lockBoard = true;
+            if (firstCard.getId() == secondCard.getId()) {
 
-        lockBoard = true; // 🔒 zamkneme desku
+                if (firstPlayer.isTurn()) {
+                    addScore(firstPlayer);
+                }else if (secondPlayer.isTurn()) {
+                    addScore(secondPlayer);
+                }else  if(thirdPlayer.isTurn()) {
+                    addScore(thirdPlayer);
+                }
 
-        if (firstCard.getId() == secondCard.getId()) {
-
-            if (firstPlayer.isTurn()) {
-                addScore(firstPlayer);
-            } else {
-                addScore(secondPlayer);
-            }
-
-            firstCard.getButton().setDisable(true);
-            secondCard.getButton().setDisable(true);
-
-            firstCard = null;
-            secondCard = null;
-
-            lockBoard = false; // 🔓 odemkneme
-            switchPlayer();
-            checkGameState();
-
-        } else {
-
-            InfoLabel.setText("WRONG FRUIT");
-
-            Card tempFirst = firstCard;
-            Card tempSecond = secondCard;
-
-            PauseTransition pause = new PauseTransition(Duration.seconds(0.8));
-            pause.setOnFinished(e -> {
-                tempFirst.flipBack();
-                tempSecond.flipBack();
+                firstCard.getButton().setDisable(true);
+                secondCard.getButton().setDisable(true);
 
                 firstCard = null;
                 secondCard = null;
 
-                lockBoard = false; // 🔓 odemkneme až po otočení zpět
+                lockBoard = false;
                 switchPlayer();
-            });
+                checkGameState();
+            } else {
 
-            pause.play();
-        }
+                InfoLabel.setText("WRONG FRUIT");
+
+                Card tempFirst = firstCard;
+                Card tempSecond = secondCard;
+
+                PauseTransition pause = new PauseTransition(Duration.seconds(0.8));
+                pause.setOnFinished(e -> {
+                    tempFirst.flipBack();
+                    tempSecond.flipBack();
+
+                    firstCard = null;
+                    secondCard = null;
+
+                    lockBoard = false;
+                    switchPlayer();
+                });
+
+                pause.play();
+            }
     }
 
 
 
     @FXML
     private void checkWinner() {
-        if (firstPlayer.getScore() > secondPlayer.getScore()){
+        if (firstPlayer.getScore() > secondPlayer.getScore() && firstPlayer.getScore() > thirdPlayer.getScore()){
             InfoLabel.setText("PLAYER "+firstPlayer.getName()+" WON (Fruits: "+firstPlayer.getScore()+")");
-        }else if (secondPlayer.getScore() > firstPlayer.getScore()){
+        }else if (secondPlayer.getScore() > firstPlayer.getScore() && secondPlayer.getScore() > thirdPlayer.getScore()){
+            InfoLabel.setText("PLAYER "+secondPlayer.getName()+" WON (Fruits: "+secondPlayer.getScore()+")");
+        }else if (thirdPlayer.getScore() >  firstPlayer.getScore() && thirdPlayer.getScore() > secondPlayer.getScore()){
             InfoLabel.setText("PLAYER "+secondPlayer.getName()+" WON (Fruits: "+secondPlayer.getScore()+")");
         }
     }
@@ -194,7 +228,6 @@ public class GameController {
     private void checkGameState() {
         if (firstPlayer.getScore()+secondPlayer.getScore() == 8){
             checkWinner();
-            NewGameButton.setDisable(false);
         }
     }
 

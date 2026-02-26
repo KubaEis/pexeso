@@ -3,6 +3,7 @@ package com.example.demo;
 public class Player {
     private String name;
     private int score;
+    private int turns;
     private boolean turn;
     Player(String name, boolean turn) {
         this.name = name;
@@ -19,6 +20,12 @@ public class Player {
     }
     public void setScore(int score) {
         this.score = score;
+    }
+    public int getTurns() {
+        return turns;
+    }
+    public void setTurns(int turns) {
+        this.turns = turns;
     }
     public boolean isTurn() {
         return turn;
